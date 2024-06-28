@@ -1,0 +1,87 @@
+CREATE DATABASE DemoApp
+
+CREATE TABLE People
+(
+Id INT PRIMARY KEY IDENTITY,
+Name VARCHAR(50) NOT NULL,
+Surname VARCHAR(50) NOT NULL,
+PhoneNumber VARCHAR(50) DEFAULT '000000000000',
+Email VARCHAR(100) NOT NULL,
+Age INT NOT NULL,
+Gender VARCHAR CHECK (Gender = 'M' or Gender = 'F'),
+HasCitizenship BIT NOT NULL,
+CityId INT FOREIGN KEY REFERENCES Cities(Id)
+)
+
+
+CREATE TABLE Countries
+(
+Id INT PRIMARY KEY IDENTITY,
+Name VARCHAR(50) NOT NULL,
+Area DECIMAL(18,3) NOT NULL
+)
+
+
+CREATE TABLE Cities
+(
+Id INT PRIMARY KEY IDENTITY,
+Name VARCHAR(50) NOT NULL,
+Area DECIMAL(18,2) NOT NULL,
+CountryId INT FOREIGN KEY REFERENCES Countries(Id)
+)
+
+CREATE VIEW PEOPLE_VIEW as
+SELECT CONCAT(P.Name ,' ' ,P.Surname) AS 'Fullname',P.Gender, P.Age, P.Email, P.PhoneNumber,  Ci.Name AS 'City', Co.Name 'Country' 
+FROM People AS P
+JOIN Cities AS Ci
+ON Ci.Id = P.CityId
+JOIN Countries AS Co
+ON Co.Id = Ci.CountryId
+
+SELECT * FROM PEOPLE_VIEW
+
+
+
+SELECT * FROM Countries AS C
+ORDER BY C.Area;
+
+
+
+SELECT * FROM Cities AS C
+ORDER BY C.Name DESC;
+
+
+
+SELECT COUNT(*) AS 'Count'
+FROM Countries AS C
+WHERE C.Area > 200000
+
+
+
+SELECT TOP 1 C.Name, MAX(C.Area) AS 'Area'
+FROM Countries AS C
+WHERE C.Name LIKE 'I%'
+GROUP BY C.Name
+
+
+
+SELECT C.Id, C.Name ,C.Area FROM Cities AS C
+UNION ALL
+SELECT * FROM Countries
+
+
+
+SELECT C.Name, COUNT(*) AS 'Count'
+FROM Cities AS C
+INNER JOIN  People AS P
+ON P.CityId = C.Id
+GROUP BY C.Name
+
+
+
+SELECT C.Name, COUNT(*) AS 'Count'
+FROM Cities AS C
+JOIN People AS P
+ON P.CityId = C.Id
+GROUP BY C.Name
+HAVING COUNT(P.Id) > 1
